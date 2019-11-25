@@ -1,0 +1,21 @@
+{
+  "name" : "favicon.ico",
+  "request" : {
+    "urlPattern" : "/favicon.ico",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName": "app/favicon.ico",
+    "headers" : {
+      "content-type" : "image/x-icon",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Methods" : "*",
+      "Access-Control-Allow-Headers" : "authorization,caller-id,channel,content-type,correlation-id,device-info,session-id,timestamp"
+    }
+  },
+  "persistent" : true,
+  "metadata" : {
+    "file_name" : ""
+  }
+}
