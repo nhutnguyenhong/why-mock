@@ -1,0 +1,21 @@
+{
+  "name" : "fontawesome-ttf",
+  "request" : {
+    "urlPattern" : "/static/media/fontawesome-webfont.ttf",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName": "app/static/media/fontawesome-webfont.ttf",
+    "headers" : {
+      "content-type" : "text/css",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Methods" : "*",
+      "Access-Control-Allow-Headers" : "authorization,caller-id,channel,content-type,correlation-id,device-info,session-id,timestamp"
+    }
+  },
+  "persistent" : true,
+  "metadata" : {
+    "file_name" : ""
+  }
+}

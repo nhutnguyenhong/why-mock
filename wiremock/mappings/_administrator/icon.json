@@ -1,0 +1,21 @@
+{
+  "name" : "icon.png",
+  "request" : {
+    "urlPattern" : "/static/media/wiremock.png",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName": "app/wiremock.png",
+    "headers" : {
+      "content-type" : "image/png",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Methods" : "*",
+      "Access-Control-Allow-Headers" : "authorization,caller-id,channel,content-type,correlation-id,device-info,session-id,timestamp"
+    }
+  },
+  "persistent" : true,
+  "metadata" : {
+    "file_name" : ""
+  }
+}

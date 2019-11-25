@@ -1,0 +1,21 @@
+{
+  "id" : "b3d538ce-75b5-4cec-b0a7-5c7c4366c410",
+  "name" : "hello world",
+  "request" : {
+    "urlPattern" : "/hello",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "body" : "{\"field\":\"Success!\"}",
+    "headers" : {
+      "content-type" : "application/json"
+    }
+  },
+  "uuid" : "b3d538ce-75b5-4cec-b0a7-5c7c4366c410",
+  "persistent" : true,
+  "metadata" : {
+    "file_name" : "group 1"
+  },
+  "insertionIndex" : 24
+}
