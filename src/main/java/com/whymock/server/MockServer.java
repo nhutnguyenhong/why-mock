@@ -1,8 +1,8 @@
-package com.puremock.server;
+package com.whymock.server;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.puremock.mapping.CustomMappingSource;
+import com.whymock.mapping.CustomMappingSource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockApp.MAPPINGS_ROOT;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 
 @Slf4j
-public class PureMockServer {
+public class MockServer {
 
     static WireMockServer wireMockServer;
 

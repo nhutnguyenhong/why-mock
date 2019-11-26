@@ -1,4 +1,4 @@
-package com.puremock.mapping;
+package com.whymock.mapping;
 
 import com.github.tomakehurst.wiremock.common.*;
 import com.github.tomakehurst.wiremock.http.Body;
