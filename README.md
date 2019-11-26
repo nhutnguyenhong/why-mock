@@ -12,7 +12,7 @@ End-to-End application with all features: add, edit, delete, search all mocking 
 ![Administrator page](https://github.com/nhutnguyenhong/why-mock/blob/master/docs/screenshot.png)
 
 ## How to run
-This simple application is same as other maven application. You just need clone the source and run the class `PureMockServer`.
+This simple application is same as other maven application. You just need clone the source and run the class `MockServer`.
 All mocking data will be stored in `wiremock` folder like normal WireMock application.
 
 ## References
