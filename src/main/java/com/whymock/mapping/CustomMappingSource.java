@@ -27,11 +27,17 @@ import static com.github.tomakehurst.wiremock.common.Json.writePrivate;
 
 @Slf4j
 public class CustomMappingSource implements MappingsSource {
+
     private static final String FILE_NAME = "file_name";
+
     private static final String STATUS = "status";
 
+    private static final String CONTEXT = "context";
+
     private final FileSource mappingsFileSource;
+
     private final Map<UUID, String> fileNameMap;
+
     private StubMappings stubMappings;
 
     private HttpHeader[] additionalHeaders = new HttpHeader[]{
@@ -55,13 +61,16 @@ public class CustomMappingSource implements MappingsSource {
         String path = fileNameMap.getOrDefault(
                 stubMapping.getId(),
                 SafeNames.makeSafeFileName(stubMapping));
-
+        Optional<String> pathByContext = getContextPath(stubMapping);
         if (stubMapping.getMetadata().containsKey(FILE_NAME)) {
             try {
                 String directoryName = stubMapping.getMetadata().get(FILE_NAME).toString();
-                FileUtils.forceMkdir(new File(mappingsFileSource.getPath() + File.separator + directoryName));
+                FileUtils.forceMkdir(new File(
+                        mappingsFileSource.getPath() +
+                                (pathByContext.isPresent() ? File.separator + pathByContext.get() : "")
+                                + File.separator + directoryName));
                 mappingsFileSource.deleteFile(path);
-                path = directoryName + File.separator + stubMapping.getName() + ".json";
+                path = (pathByContext.isPresent() ? pathByContext.get() + File.separator : "") + directoryName + File.separator + stubMapping.getName() + ".json";
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -74,12 +83,36 @@ public class CustomMappingSource implements MappingsSource {
         addDefaultHeaders(stubMapping);
     }
 
+    private Optional<String> getContextPath(StubMapping stubMapping) {
+        if (stubMapping.getMetadata().containsKey(CONTEXT)) {
+            String directoryName = stubMapping.getMetadata().get(CONTEXT).toString();
+            try {
+                File contextDir = new File(mappingsFileSource.getPath() + File.separator + CONTEXT);
+                if (!contextDir.exists()) {
+                    FileUtils.forceMkdir(contextDir);
+                }
+                FileUtils.forceMkdir(new File(mappingsFileSource.getPath() + File.separator + CONTEXT + File.separator + directoryName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return Optional.of(CONTEXT + File.separator + directoryName);
+        }
+        return Optional.empty();
+    }
+
 
     @Override
     public void remove(StubMapping stubMapping) {
         String path = fileNameMap.get(stubMapping.getId());
+
         if (stubMapping.getMetadata().containsKey(FILE_NAME)) {
-            path = stubMapping.getMetadata().get(FILE_NAME) + File.separator + stubMapping.getName() + ".json";
+            path =
+                    (stubMapping.getMetadata().containsKey(CONTEXT) ?
+                            CONTEXT + File.separator + stubMapping.getMetadata().get(CONTEXT) + File.separator
+                            :
+                            "") +
+                            stubMapping.getMetadata().get(FILE_NAME)
+                            + File.separator + stubMapping.getName() + ".json";
         }
         mappingsFileSource.deleteFile(path);
         fileNameMap.remove(stubMapping.getId());
