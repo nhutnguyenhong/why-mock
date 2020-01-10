@@ -12,8 +12,10 @@ import com.github.tomakehurst.wiremock.admin.model.PathParams;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GetAllStubMappingsTask implements AdminTask {
 
@@ -40,16 +43,27 @@ public class GetAllStubMappingsTask implements AdminTask {
         List<StubMapping> stubs;
         ListStubMappingsResult result = new ListStubMappingsResult(LimitAndOffsetPaginator.fromRequest(admin.listAllStubMappings().getMappings(), request));
         if (context.isPresent()) {
-            stubs = result.getMappings().stream().filter(item ->
+            stubs = (List<StubMapping>) additionalFilter(result.getMappings().stream().filter(item ->
                     Objects.nonNull(item.getMetadata().get("context")) &&
-                            item.getMetadata().get("context").toString().equalsIgnoreCase(context.get())).collect(Collectors.toList());
+                            item.getMetadata().get("context").toString().equalsIgnoreCase(context.get()))
+            ).collect(Collectors.toList());
         } else {
-            stubs = result.getMappings().stream().filter(item -> Objects.isNull(item.getMetadata().get("context"))).collect(Collectors.toList());
+            stubs = (List<StubMapping>) additionalFilter(result.getMappings().stream()
+                    .filter(item -> Objects.isNull(item.getMetadata().get("context"))))
+                    .collect(Collectors.toList());
 
         }
         ListStubMappingsResult newResult = new ListStubMappingsResult(stubs, result.getMeta());
         return ResponseDefinitionBuilder.jsonResponse(newResult);
 
+    }
+
+    private Stream additionalFilter(Stream<StubMapping> stream) {
+        return stream.filter(item -> item.getRequest().getMethod() != RequestMethod.OPTIONS)
+                .filter(item -> Objects.nonNull(item.getName()))
+                .filter(item -> Objects.nonNull(item.getMetadata()))
+                .filter(item -> item.getMetadata().containsKey("file_name"))
+                .filter(item -> StringUtils.isNotEmpty(item.getMetadata().getString("file_name")));
     }
 
 }
