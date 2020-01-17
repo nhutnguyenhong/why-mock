@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+    wiremock:
+        container_name: whymock
+        image: whymock:latest
+        environment:
+            - uid=1001
+        ports:
+            - 5868:5868
+        volumes:
+            - ./wiremock/:/wiremock
+        command:
+            - -verbose
+            - -global-response-templating
+        networks:
+            - whymock_default
+networks:
+    whymock_default:
+        external: true

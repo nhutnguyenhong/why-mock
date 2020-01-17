@@ -59,7 +59,7 @@ public class GetAllStubMappingsTask implements AdminTask {
     }
 
     private Stream additionalFilter(Stream<StubMapping> stream) {
-        return stream.filter(item -> item.getRequest().getMethod() != RequestMethod.OPTIONS)
+        return stream.filter(item -> !item.getRequest().getMethod().getName().equalsIgnoreCase(RequestMethod.OPTIONS.getName()))
                 .filter(item -> Objects.nonNull(item.getName()))
                 .filter(item -> Objects.nonNull(item.getMetadata()))
                 .filter(item -> item.getMetadata().containsKey("file_name"))

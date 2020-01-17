@@ -1,11 +1,19 @@
 package com.whymock.mapping;
 
-import com.github.tomakehurst.wiremock.common.*;
+import com.github.tomakehurst.wiremock.common.FileSource;
+import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.common.JsonException;
+import com.github.tomakehurst.wiremock.common.SafeNames;
+import com.github.tomakehurst.wiremock.common.TextFile;
 import com.github.tomakehurst.wiremock.http.Body;
 import com.github.tomakehurst.wiremock.http.HttpHeader;
 import com.github.tomakehurst.wiremock.http.HttpHeaders;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.matching.*;
+import com.github.tomakehurst.wiremock.matching.AbsentPattern;
+import com.github.tomakehurst.wiremock.matching.RegexPattern;
+import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
+import com.github.tomakehurst.wiremock.matching.UrlPattern;
 import com.github.tomakehurst.wiremock.standalone.MappingFileException;
 import com.github.tomakehurst.wiremock.standalone.MappingsSource;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -19,7 +27,14 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.common.AbstractFileSource.byFileExtension;
@@ -44,7 +59,7 @@ public class CustomMappingSource implements MappingsSource {
             new HttpHeader("Access-Control-Allow-Origin", "*"),
             new HttpHeader("Access-Control-Allow-Methods", "*"),
             new HttpHeader("Access-Control-Allow-Headers",
-                    "authorization,caller-id,channel,content-type,correlation-id,device-info,expires,pragma,session-id,timestamp")};
+                    "*")};
 
     public CustomMappingSource(FileSource mappingsFileSource) {
         this.mappingsFileSource = mappingsFileSource;
@@ -62,15 +77,18 @@ public class CustomMappingSource implements MappingsSource {
                 stubMapping.getId(),
                 SafeNames.makeSafeFileName(stubMapping));
         Optional<String> pathByContext = getContextPath(stubMapping);
+        String absolutePath = path;
         if (stubMapping.getMetadata().containsKey(FILE_NAME)) {
             try {
                 String directoryName = stubMapping.getMetadata().get(FILE_NAME).toString();
-                FileUtils.forceMkdir(new File(
+                String absoluteDirPath =
                         mappingsFileSource.getPath() +
                                 (pathByContext.isPresent() ? File.separator + pathByContext.get() : "")
-                                + File.separator + directoryName));
+                                + File.separator + directoryName;
+                FileUtils.forceMkdir(new File(absoluteDirPath));
                 mappingsFileSource.deleteFile(path);
                 path = (pathByContext.isPresent() ? pathByContext.get() + File.separator : "") + directoryName + File.separator + stubMapping.getName() + ".json";
+                absolutePath = mappingsFileSource.getPath() + File.separator + path;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -81,6 +99,14 @@ public class CustomMappingSource implements MappingsSource {
         stubMapping.setDirty(false);
         allowLoad(stubMapping);
         addDefaultHeaders(stubMapping);
+        addOptionMapping(new TextFile(new File(absolutePath).toURI()));
+    }
+
+    private void addOptionMapping(TextFile mappingFile) {
+        StubMappingCollection stubCollectionOptions = Json.read(mappingFile.readContentsAsString(), StubMappingCollection.class);
+        setOptionsStub(stubCollectionOptions);
+        addDefaultHeaders(stubCollectionOptions);
+        stubMappings.addMapping(stubCollectionOptions);
     }
 
     private Optional<String> getContextPath(StubMapping stubMapping) {
